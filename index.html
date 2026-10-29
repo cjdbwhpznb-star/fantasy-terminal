@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantasy Terminal // Pro Market</title>
+    <title>Fantasy Terminal // Mercado & Scouting Pro</title>
     <style>
         body {
             background-color: #05070b;
@@ -12,74 +12,192 @@
             margin: 0;
             padding: 15px;
         }
-        h1 {
+        h1, h2 {
             color: #fff;
-            font-size: 1.3rem;
             border-bottom: 1px dashed #1f293d;
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
-        .card {
+        .section {
             background: #0d1322;
             border: 1px solid #1f293d;
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+        input, select {
+            background: #05070b;
+            color: #00ff66;
+            border: 1px solid #38bdf8;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 10px;
             border-radius: 4px;
         }
-        .header-row {
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .card {
+            background: #111827;
+            border: 1px solid #1f293d;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        .row {
             display: flex;
             justify-content: space-between;
-            font-weight: bold;
-            font-size: 1.05rem;
-            color: #38bdf8;
+            align-items: center;
         }
-        .price { color: #facc15; }
-        .trend-up { color: #22c55e; }
-        .trend-down { color: #ef4444; }
+        .price { color: #facc15; font-weight: bold; }
+        .trend-up { color: #22c55e; font-weight: bold; }
+        .trend-down { color: #ef4444; font-weight: bold; }
         .badge {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             padding: 2px 6px;
             border-radius: 4px;
             background: #1e293b;
+            color: #38bdf8;
         }
-        .notes {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-top: 6px;
-            border-top: 1px solid #162032;
-            padding-top: 4px;
+        .vs-box {
+            background: #05070b;
+            border: 1px dashed #facc15;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <h1>⚡ FANTASY TERMINAL // LALIGA INTEL</h1>
-    <div id="pumps-container">Conectando con base de datos táctica...</div>
+
+    <h1>⚡ FANTASY TERMINAL // SCOUTING & MARKET</h1>
+
+    <!-- BUSCADOR Y FILTRO DE MERCADO -->
+    <div class="section">
+        <h2>🔍 Buscador de Mercado (Subidas / Bajadas)</h2>
+        <input type="text" id="searchInput" placeholder="Escribe el nombre del jugador (ej: Mbappé, Yamal, Raphinha)..." onkeyup="filterMarket()">
+        
+        <div id="market-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
+            <!-- Los datos se cargan dinámicamente -->
+        </div>
+    </div>
+
+    <!-- COMPARADOR 1 VS 1 -->
+    <div class="section">
+        <h2>⚖️ Comparador 1 vs 1 & Titularidad</h2>
+        <div class="grid-2">
+            <div>
+                <label>Jugador A:</label>
+                <select id="player1" onchange="comparePlayers()">
+                    <option value="">Selecciona...</option>
+                </select>
+            </div>
+            <div>
+                <label>Jugador B:</label>
+                <select id="player2" onchange="comparePlayers()">
+                    <option value="">Selecciona...</option>
+                </select>
+            </div>
+        </div>
+        <div id="comparison-result" class="vs-box">
+            Selecciona dos jugadores para contrastar valor, tendencia y % de titularidad.
+        </div>
+    </div>
 
     <script>
-        fetch('https://fantasy-terminal.onrender.com/api/pumps')
-            .then(res => res.json())
-            .then(data => {
-                const container = document.getElementById('pumps-container');
-                container.innerHTML = '';
-                data.forEach(p => {
-                    const trendClass = p.trend.includes('+') ? 'trend-up' : 'trend-down';
-                    container.innerHTML += `
-                        <div class="card">
-                            <div class="header-row">
-                                <span>${p.name} (${p.team})</span>
-                                <span class="price">${p.price}</span>
-                            </div>
-                            <div style="margin-top: 6px;">
-                                <span class="badge">${p.status}</span> 
-                                <span class="${trendClass}">${p.trend}</span>
-                            </div>
-                            <div class="notes">💡 ${p.notes}</div>
+        // Base de datos simulada con métricas estilo FutbolFantasy
+        const dbPlayers = [
+            { name: "Kylian Mbappé", team: "Real Madrid", price: 175809468, trend: "+1.274.835 €", status: "Titular 95%", isUp: true, points: 120 },
+            { name: "Lamine Yamal", team: "Barcelona", price: 191735777, trend: "-942.285 €", status: "Titular 95%", isUp: false, points: 127 },
+            { name: "Raphinha", team: "Barcelona", price: 173348564, trend: "+796.054 €", status: "Titular 90%", isUp: true, points: 128 },
+            { name: "Arda Güler", team: "Real Madrid", price: 121223132, trend: "+2.137.574 €", status: "Titular 70%", isUp: true, points: 91 },
+            { name: "Jude Bellingham", team: "Real Madrid", price: 128171216, trend: "+1.193.128 €", status: "Titular 95%", isUp: true, points: 93 },
+            { name: "Isco Alarcón", team: "Real Betis", price: 56641950, trend: "+1.353.218 €", status: "Titular 80%", isUp: true, points: 75 },
+            { name: "Vinicius Junior", team: "Real Madrid", price: 62441583, trend: "-1.246.713 €", status: "Titular 90%", isUp: false, points: 82 },
+            { name: "Dani Olmo", team: "Barcelona", price: 43835837, trend: "-1.181.595 €", status: "Duda 50%", isUp: false, points: 60 }
+        ];
+
+        function initApp() {
+            renderMarket(dbPlayers);
+            populateSelects();
+        }
+
+        function renderMarket(data) {
+            const container = document.getElementById('market-list');
+            container.innerHTML = '';
+            if(data.length === 0) {
+                container.innerHTML = '<div style="color: #ef4444; text-align:center;">No se encontró ningún jugador.</div>';
+                return;
+            }
+            data.forEach(p => {
+                const trendClass = p.isUp ? 'trend-up' : 'trend-down';
+                container.innerHTML += `
+                    <div class="card">
+                        <div class="row">
+                            <span><strong>${p.name}</strong> <span style="color:#94a3b8">(${p.team})</span></span>
+                            <span class="price">${p.price.toLocaleString()} €</span>
                         </div>
-                    `;
-                });
-            })
-            .catch(err => {
-                document.getElementById('pumps-container').innerHTML = '⚠️ Error de enlace con el servidor.';
+                        <div class="row" style="margin-top: 5px;">
+                            <span class="badge">🎯 ${p.status}</span>
+                            <span class="${trendClass}">${p.trend}</span>
+                        </div>
+                    </div>
+                `;
             });
+        }
+
+        function filterMarket() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = dbPlayers.filter(p => p.name.toLowerCase().includes(query) || p.team.toLowerCase().includes(query));
+            renderMarket(filtered);
+        }
+
+        function populateSelects() {
+            const p1 = document.getElementById('player1');
+            const p2 = document.getElementById('player2');
+            dbPlayers.forEach((p, index) => {
+                p1.innerHTML += `<option value="${index}">${p.name} (${p.team})</option>`;
+                p2.innerHTML += `<option value="${index}">${p.name} (${p.team})</option>`;
+            });
+        }
+
+        function comparePlayers() {
+            const idx1 = document.getElementById('player1').value;
+            const idx2 = document.getElementById('player2').value;
+            const resBox = document.getElementById('comparison-result');
+
+            if(idx1 === "" || idx2 === "") {
+                resBox.innerHTML = "Selecciona ambos jugadores para ver la comparativa.";
+                return;
+            }
+
+            const pA = dbPlayers[idx1];
+            const pB = dbPlayers[idx2];
+
+            resBox.innerHTML = `
+                <div style="display: flex; justify-content: space-between; text-align: left;">
+                    <div>
+                        <strong style="color: #38bdf8;">${pA.name}</strong><br>
+                        💰 ${pA.price.toLocaleString()} €<br>
+                        📈 Tendencia: <span class="${pA.isUp ? 'trend-up':'trend-down'}">${pA.trend}</span><br>
+                        🎯 Titularidad: <strong>${pA.status}</strong><br>
+                        ⭐ Puntos Totales: ${pA.points}
+                    </div>
+                    <div style="border-left: 1px dashed #38bdf8; padding-left: 10px;">
+                        <strong style="color: #38bdf8;">${pB.name}</strong><br>
+                        💰 ${pB.price.toLocaleString()} €<br>
+                        📈 Tendencia: <span class="${pB.isUp ? 'trend-up':'trend-down'}">${pB.trend}</span><br>
+                        🎯 Titularidad: <strong>${pB.status}</strong><br>
+                        ⭐ Puntos Totales: ${pB.points}
+                    </div>
+                </div>
+            `;
+        }
+
+        initApp();
     </script>
 </body>
 </html>
