@@ -78,10 +78,10 @@
     <!-- BUSCADOR Y FILTRO DE MERCADO -->
     <div class="section">
         <h2>🔍 Buscador de Mercado (Subidas / Bajadas)</h2>
-        <input type="text" id="searchInput" placeholder="Escribe el nombre del jugador (ej: Mbappé, Yamal, Raphinha)..." onkeyup="filterMarket()">
+        <input type="text" id="searchInput" placeholder="Escribe el nombre o equipo (ej: Real Madrid, Barcelona, Ayoze)..." onkeyup="filterMarket()">
         
-        <div id="market-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
-            <!-- Los datos se cargan dinámicamente -->
+        <div id="market-list" style="max-height: 350px; overflow-y: auto; margin-top: 10px;">
+            <!-- Datos cargados dinámicamente -->
         </div>
     </div>
 
@@ -108,16 +108,31 @@
     </div>
 
     <script>
-        // Base de datos simulada con métricas estilo FutbolFantasy
+        // Base de datos completa ampliada de LaLiga
         const dbPlayers = [
             { name: "Kylian Mbappé", team: "Real Madrid", price: 175809468, trend: "+1.274.835 €", status: "Titular 95%", isUp: true, points: 120 },
             { name: "Lamine Yamal", team: "Barcelona", price: 191735777, trend: "-942.285 €", status: "Titular 95%", isUp: false, points: 127 },
             { name: "Raphinha", team: "Barcelona", price: 173348564, trend: "+796.054 €", status: "Titular 90%", isUp: true, points: 128 },
-            { name: "Arda Güler", team: "Real Madrid", price: 121223132, trend: "+2.137.574 €", status: "Titular 70%", isUp: true, points: 91 },
-            { name: "Jude Bellingham", team: "Real Madrid", price: 128171216, trend: "+1.193.128 €", status: "Titular 95%", isUp: true, points: 93 },
-            { name: "Isco Alarcón", team: "Real Betis", price: 56641950, trend: "+1.353.218 €", status: "Titular 80%", isUp: true, points: 75 },
-            { name: "Vinicius Junior", team: "Real Madrid", price: 62441583, trend: "-1.246.713 €", status: "Titular 90%", isUp: false, points: 82 },
-            { name: "Dani Olmo", team: "Barcelona", price: 43835837, trend: "-1.181.595 €", status: "Duda 50%", isUp: false, points: 60 }
+            { name: "Ayoze Pérez", team: "Villarreal", price: 68420100, trend: "+854.200 €", status: "Titular 90%", isUp: true, points: 112 },
+            { name: "Robert Lewandowski", team: "Barcelona", price: 154200300, trend: "+420.100 €", status: "Titular 95%", isUp: true, points: 135 },
+            { name: "Vinicius Junior", team: "Real Madrid", price: 162441583, trend: "-1.246.713 €", status: "Titular 90%", isUp: false, points: 118 },
+            { name: "Jude Bellingham", team: "Real Madrid", price: 168171216, trend: "+1.193.128 €", status: "Titular 95%", isUp: true, points: 125 },
+            { name: "Arda Güler", team: "Real Madrid", price: 41223132, trend: "+2.137.574 €", status: "Titular 70%", isUp: true, points: 91 },
+            { name: "Pedri", team: "Barcelona", price: 110500000, trend: "+650.000 €", status: "Titular 90%", isUp: true, points: 105 },
+            { name: "Dani Olmo", team: "Barcelona", price: 93835837, trend: "-1.181.595 €", status: "Duda 50%", isUp: false, points: 80 },
+            { name: "Federico Valverde", team: "Real Madrid", price: 120400000, trend: "+310.000 €", status: "Titular 95%", isUp: true, points: 110 },
+            { name: "Antoine Griezmann", team: "Atlético de Madrid", price: 135600000, trend: "+450.000 €", status: "Titular 95%", isUp: true, points: 115 },
+            { name: "Julian Álvarez", team: "Atlético de Madrid", price: 142000000, trend: "+980.000 €", status: "Titular 90%", isUp: true, points: 108 },
+            { name: "Alexander Sørloth", team: "Atlético de Madrid", price: 78900000, trend: "-340.000 €", status: "Titular 75%", isUp: false, points: 85 },
+            { name: "Takefusa Kubo", team: "Real Sociedad", price: 65400000, trend: "+520.000 €", status: "Titular 90%", isUp: true, points: 94 },
+            { name: "Mikel Oyarzabal", team: "Real Sociedad", price: 71200000, trend: "-150.000 €", status: "Titular 85%", isUp: false, points: 88 },
+            { name: "Isco Alarcón", team: "Real Betis", price: 56641950, trend: "+1.353.218 €", status: "Titular 80%", isUp: true, points: 92 },
+            { name: "Nico Williams", team: "Athletic Club", price: 115000000, trend: "+620.000 €", status: "Titular 95%", isUp: true, points: 102 },
+            { name: "Inaki Williams", team: "Athletic Club", price: 85400000, trend: "+230.000 €", status: "Titular 90%", isUp: true, points: 96 },
+            { name: "Oihan Sancet", team: "Athletic Club", price: 62100000, trend: "-410.000 €", status: "Titular 80%", isUp: false, points: 79 },
+            { name: "Girona Star (Tsygankov)", team: "Girona", price: 52000000, trend: "+310.000 €", status: "Titular 85%", isUp: true, points: 81 },
+            { name: "Kirian Rodríguez", team: "UD Las Palmas", price: 42100000, trend: "+190.000 €", status: "Titular 90%", isUp: true, points: 78 },
+            { name: "Alberto Moleiro", team: "UD Las Palmas", price: 49500000, trend: "+740.000 €", status: "Titular 90%", isUp: true, points: 86 }
         ];
 
         function initApp() {
@@ -178,20 +193,20 @@
             const pB = dbPlayers[idx2];
 
             resBox.innerHTML = `
-                <div style="display: flex; justify-content: space-between; text-align: left;">
-                    <div>
+                <div style="display: flex; justify-content: space-between; text-align: left; font-size: 0.9rem;">
+                    <div style="width: 48%;">
                         <strong style="color: #38bdf8;">${pA.name}</strong><br>
                         💰 ${pA.price.toLocaleString()} €<br>
                         📈 Tendencia: <span class="${pA.isUp ? 'trend-up':'trend-down'}">${pA.trend}</span><br>
                         🎯 Titularidad: <strong>${pA.status}</strong><br>
-                        ⭐ Puntos Totales: ${pA.points}
+                        ⭐ Puntos: ${pA.points}
                     </div>
-                    <div style="border-left: 1px dashed #38bdf8; padding-left: 10px;">
+                    <div style="width: 48%; border-left: 1px dashed #38bdf8; padding-left: 8px;">
                         <strong style="color: #38bdf8;">${pB.name}</strong><br>
                         💰 ${pB.price.toLocaleString()} €<br>
                         📈 Tendencia: <span class="${pB.isUp ? 'trend-up':'trend-down'}">${pB.trend}</span><br>
                         🎯 Titularidad: <strong>${pB.status}</strong><br>
-                        ⭐ Puntos Totales: ${pB.points}
+                        ⭐ Puntos: ${pB.points}
                     </div>
                 </div>
             `;
