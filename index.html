@@ -3,41 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantasy Terminal - LaLiga</title>
+    <title>Fantasy Terminal // Pro Market</title>
     <style>
         body {
-            background-color: #0b0f19;
+            background-color: #05070b;
             color: #00ff66;
             font-family: 'Courier New', Courier, monospace;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
         }
         h1 {
             color: #fff;
-            font-size: 1.5rem;
-            border-bottom: 1px solid #1f293d;
-            padding-bottom: 10px;
+            font-size: 1.3rem;
+            border-bottom: 1px dashed #1f293d;
+            padding-bottom: 8px;
         }
         .card {
-            background: #131b2e;
+            background: #0d1322;
             border: 1px solid #1f293d;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 4px;
         }
-        .player-name {
+        .header-row {
+            display: flex;
+            justify-content: space-between;
             font-weight: bold;
+            font-size: 1.05rem;
             color: #38bdf8;
-            font-size: 1.1rem;
         }
-        .trend {
-            color: #22c55e;
+        .price { color: #facc15; }
+        .trend-up { color: #22c55e; }
+        .trend-down { color: #ef4444; }
+        .badge {
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #1e293b;
+        }
+        .notes {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 6px;
+            border-top: 1px solid #162032;
+            padding-top: 4px;
         }
     </style>
 </head>
 <body>
-    <h1>⚡ FANTASY TERMINAL // MARKET PUMPS</h1>
-    <div id="pumps-container">Cargando datos del servidor...</div>
+    <h1>⚡ FANTASY TERMINAL // LALIGA INTEL</h1>
+    <div id="pumps-container">Conectando con base de datos táctica...</div>
 
     <script>
         fetch('https://fantasy-terminal.onrender.com/api/pumps')
@@ -46,18 +61,24 @@
                 const container = document.getElementById('pumps-container');
                 container.innerHTML = '';
                 data.forEach(p => {
+                    const trendClass = p.trend.includes('+') ? 'trend-up' : 'trend-down';
                     container.innerHTML += `
                         <div class="card">
-                            <div class="player-name">${p.name} (${p.team})</div>
-                            <div>Precio: ${p.price}</div>
-                            <div class="trend">Tendencia: ${p.trend}</div>
-                            <div>Estado: <strong>${p.status}</strong></div>
+                            <div class="header-row">
+                                <span>${p.name} (${p.team})</span>
+                                <span class="price">${p.price}</span>
+                            </div>
+                            <div style="margin-top: 6px;">
+                                <span class="badge">${p.status}</span> 
+                                <span class="${trendClass}">${p.trend}</span>
+                            </div>
+                            <div class="notes">💡 ${p.notes}</div>
                         </div>
                     `;
                 });
             })
             .catch(err => {
-                document.getElementById('pumps-container').innerHTML = 'Error al conectar con el servidor.';
+                document.getElementById('pumps-container').innerHTML = '⚠️ Error de enlace con el servidor.';
             });
     </script>
 </body>
